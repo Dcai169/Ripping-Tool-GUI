@@ -1,23 +1,26 @@
-const { execFile } = require('child_process');
-const log = require('electron-log');
-const { toolVersion } = require('./../../loading/scripts/loadingScripts.js');
-const { userPreferences } = require('./../../userPreferences.js');
-const { uiConsolePrint } = require('./uiUtils.js');
+import { execFile } from 'child_process';
+import * as log from 'electron-log';
+import { toolVersion } from '../../loading/loadingScripts.js';
+import { userPreferences } from './../../userPreferences.js';
+import { uiConsolePrint } from './uiUtils.js';
+
+let gameSelector = document.getElementById('gameSelector') as HTMLInputElement;
+let queue = $('#extract-queue');
 
 function hideLoading() {
     $('#loading-indicator').removeClass('p-1').addClass('hidden');
     $('#queue-execute-button').removeAttr('disabled');
 }
 
-function updateUiDone(code) {
+function updateUiDone(code: number) {
     hideLoading();
     uiConsolePrint(`Done (Exit Code: ${code})`);
 }
 
-function runTool(game, hashes) {
+function runTool(game: string, hashes: string[]) {
     // DestinyColladaGenerator.exe [<GAME>] [-o <OUTPUTPATH>] [<HASHES>]
-    let commandArgs = [game, '-o', userPreferences.get('outputPath')].concat(hashes);
-    let child = execFile(userPreferences.get('toolPath'), commandArgs, (err) => {
+    let commandArgs = [game, '-o', (userPreferences.get('outputPath') as string)].concat(hashes);
+    let child = execFile((userPreferences.get('toolPath') as string), commandArgs, (err: Error) => {
         if (err) {
             throw err;
         }
@@ -28,14 +31,14 @@ function runTool(game, hashes) {
     return child;
 }
 
-function runToolRecursive(game, itemHashes) {
+function runToolRecursive(game: string, itemHashes: string[]) {
     if (itemHashes.length > 0) {
         let child = runTool(game, [itemHashes.pop()]);
         child.on('exit', (code) => { runToolRecursive(game, itemHashes) });
     }
 }
 
-function execute(game, hashes) {
+function execute(game: string, hashes: string[]) {
     log.info(`Hashes: ${hashes.join(' ')}`);
     // change DOM to reflect program state
     $('#loading-indicator').removeClass('hidden').addClass('p-1');
@@ -52,8 +55,8 @@ function execute(game, hashes) {
     }
 }
 
-function executeButtonClickHandler() {
-    toolVersion(userPreferences.get('toolPath'))
+export function executeButtonClickHandler() {
+    toolVersion((userPreferences.get('toolPath') as string))
         .then((res) => {
             if (res.stdout) {
                 uiConsolePrint(`DCG v${res.stdout.substring(0, 5)}`);
@@ -63,18 +66,17 @@ function executeButtonClickHandler() {
             
                     execute(gameSelector.value, itemHashes);
                 } else {
-                    uiConsolePrint('No internet connection detected');
+                    uiConsolePrint('No internet connection detected.');
                     hideLoading();
                 }
-            } else {
-                uiConsolePrint('DCG inoperable');
+            } else if (res.stderr) {
+                uiConsolePrint('DCG version could not be determined.');
+                uiConsolePrint(`Error: ${res.stderr}`);
                 hideLoading();
             }
         })
         .catch(() => {
-            uiConsolePrint('DCG inoperable');
+            uiConsolePrint('DCG inoperable.');
             hideLoading();
         });
 }
-
-module.exports = { executeButtonClickHandler };

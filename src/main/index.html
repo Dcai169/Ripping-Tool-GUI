@@ -4,12 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Destiny API Ripper Extension</title>
-  <!-- <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css"> -->
   <link rel="stylesheet" href="../styles/darkly_bootstrap.min.css">
+  <script>var exports = {};</script>
   <script>const $ = require('jquery');</script>
   <script>require('popper.js');</script>
   <script>require('bootstrap');</script>
-  <script defer src="mainRenderer.js"></script>
+  <script defer src="./mainRenderer.js"></script>
   <link rel="stylesheet" href="./index.css">
 </head>
 
@@ -135,37 +135,37 @@
                         <ul class="dropdown-menu" style="transform: translate(calc(100% - 40px), -45.6%);">
                           <li class="dropdown-item">
                             <div class="container">
-                              <input class="form-check-input base-filter" type="checkbox" id="filter-helmet" data-index="26" data-selector="[data-itemtype='26']" checked>
+                              <input class="form-check-input base-filter" type="checkbox" id="filter-helmet" data-index="26" data-selector="[data-itemsubtype='26']" checked>
                               <label class="form-check-label" for="filter-helmet">Helmet</label>
                             </div>
                           </li>
                           <li class="dropdown-item">
                             <div class="container">
-                              <input class="form-check-input base-filter" type="checkbox" id="filter-gauntlets" data-index="25" data-selector="[data-itemtype='27']" checked>
+                              <input class="form-check-input base-filter" type="checkbox" id="filter-gauntlets" data-index="25" data-selector="[data-itemsubtype='27']" checked>
                               <label class="form-check-label" for="filter-gauntlets">Gauntlets</label>
                             </div>
                           </li>
                           <li class="dropdown-item">
                             <div class="container">
-                              <input class="form-check-input base-filter" type="checkbox" id="filter-chest" data-index="24" data-selector="[data-itemtype='28']" checked>
+                              <input class="form-check-input base-filter" type="checkbox" id="filter-chest" data-index="24" data-selector="[data-itemsubtype='28']" checked>
                               <label class="form-check-label" for="filter-chest">Chest Armor</label>
                             </div>
                           </li>
                           <li class="dropdown-item">
                             <div class="container">
-                              <input class="form-check-input base-filter" type="checkbox" id="filter-legs" data-index="23" data-selector="[data-itemtype='29']" checked>
+                              <input class="form-check-input base-filter" type="checkbox" id="filter-legs" data-index="23" data-selector="[data-itemsubtype='29']" checked>
                               <label class="form-check-label" for="filter-legs">Leg Armor</label>
                             </div>
                           </li>
                           <li class="dropdown-item">
                             <div class="container">
-                              <input class="form-check-input base-filter" type="checkbox" id="filter-class" data-index="22" data-selector="[data-itemtype='30']" checked>
+                              <input class="form-check-input base-filter" type="checkbox" id="filter-class" data-index="22" data-selector="[data-itemsubtype='30']" checked>
                               <label class="form-check-label" for="filter-class">Class Item</label>
                             </div>
                           </li>
                           <li class="dropdown-item">
                             <div class="container">
-                              <input class="form-check-input base-filter" type="checkbox" id="filter-armorOrnament" data-index="21" data-selector="[data-itemtype='21']:not([data-class='3'])" checked>
+                              <input class="form-check-input base-filter" type="checkbox" id="filter-armorOrnament" data-index="21" data-selector="[data-itemsubtype='21']:not([data-class='3'])" checked>
                               <label class="form-check-label" for="filter-armorOrnament">Armor Ornaments</label>
                             </div>
                           </li>
@@ -490,6 +490,7 @@
             <div class="mb-3">
               <label class="form-label" for="toolPath">Tool path</label>
               <input class="form-control" type="text" name="tool-path" id="toolPath" readonly>
+              <div><a class="small" id="update-button">Update</a> <small>Restart required.</small></div>
             </div>
           </div>
         </div>

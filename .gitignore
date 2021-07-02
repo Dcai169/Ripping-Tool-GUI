@@ -256,7 +256,8 @@ dist
 
 *.env
 bin/
-tests/
+proto/
 output/
 user_preferences.json
 patch_notes.md
+.vscode

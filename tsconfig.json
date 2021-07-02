@@ -1,8 +1,20 @@
 {
     "compilerOptions": {
-      "outDir": "./built",
-      "allowJs": true,
-      "target": "esnext"
+      "baseUrl": ".",
+      "outDir": "./dist",
+       
+      "lib": ["DOM", "DOM.Iterable", "es2020"],
+      "target": "esnext",
+      "module": "commonjs",
+      "moduleResolution": "node",
+
+      "noImplicitReturns": true,
+      "noUnusedLocals": false,
+      "noImplicitAny": true,
+      "removeComments": true,
+
+      "declaration": true,
+      "sourceMap": true
     },
     "include": ["./src/**/*"]
 }

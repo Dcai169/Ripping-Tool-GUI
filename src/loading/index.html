@@ -4,12 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <title>Destiny API Ripper Extension</title>
-  <!-- <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css"> -->
   <link rel="stylesheet" href="../styles/darkly_bootstrap.min.css">
+  <script>var exports = {};</script>
   <script>const $ = require('jquery');</script>
   <script>require('popper.js');</script>
   <script>require('bootstrap');</script>
-  <script defer src="loadingRenderer.js"></script>
+  <script defer src="./loadingRenderer.js"></script>
   <link rel="stylesheet" href="./index.css">
 </head>
 
@@ -23,16 +23,9 @@
     <div class="progress">
       <div class="progress-bar bg-info" id="main-bar" role="progressbar" style="width: 0%;"></div>
     </div>
-    <!-- <div class="m-2"></div>
-    <div class="progress">
-      <div class="progress-bar bg-info" id="sub-bar" role="progressbar" style="width: 0%;"></div>
-    </div> -->
     <div>
       <small style="color: #AAA;"><span id="loading-summary"></span>&nbsp;<span id="loading-dots"></span></small>
     </div>
-    <!-- <div>
-      <button class="btn btn-primary" id="launch-button">Launch</button>
-    </div> -->
   </div>
 </body>
 

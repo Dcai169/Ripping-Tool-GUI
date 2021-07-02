@@ -1,12 +1,14 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem, shell } = require('electron');
-const store = require('electron-store');
-const log = require('electron-log');
-const { debugInfo } = require('electron-util');
-const { download } = require('electron-dl');
-const { extract7zip, findExecutable } = require('./loading/scripts/loadingScripts.js');
-const { logError } = require('./userPreferences.js');
-const fs = require('fs')
-const path = require('path');
+import { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem, shell } from 'electron';
+import * as log from 'electron-log';
+import * as store from 'electron-store';
+import { debugInfo, is } from 'electron-util';
+import { download } from 'electron-dl';
+import { extract7zip, findExecutable } from './loading/loadingScripts';
+import { logError, userPreferences } from './userPreferences';
+import * as fs from 'fs';
+import * as path from 'path';
+import { downloadRes } from './types/downloadRes';
+// import { GitHubAsset } from './types/github';
 
 store.initRenderer();
 log.info(debugInfo());
@@ -54,7 +56,7 @@ const createMainWindow = () => {
             {
                 role: 'toggleDevTools',
                 accelerator: 'CmdOrCtrl+Shift+I',
-                click: () => { mainWindow.BrowserWindow.openDevTools() }
+                click: () => { mainWindow.getBrowserView().webContents.openDevTools() }
             },
             {
                 role: 'quit',
@@ -72,7 +74,7 @@ const createMainWindow = () => {
     });
 
     // and load the index.html of the app.
-    mainWindow.loadFile(path.join(__dirname, 'main', 'index.html'));
+    mainWindow.loadFile('./dist/main/index.html');
 
     // Hide menubar
     mainWindow.setMenuBarVisibility(false);
@@ -102,7 +104,7 @@ const createLoadingWindow = () => {
         submenu: [{
             role: 'toggleDevTools',
             accelerator: 'CmdOrCtrl+Shift+I',
-            click: () => { mainWindow.BrowserWindow.openDevTools() }
+            click: () => { loadingWindow.getBrowserView().webContents.openDevTools() }
         },
         {
             role: 'quit',
@@ -118,7 +120,7 @@ const createLoadingWindow = () => {
     loadingWindow.setClosable(false);
 
     // and load the index.html of the app.
-    loadingWindow.loadFile(path.join(__dirname, 'loading', 'index.html'));
+    loadingWindow.loadFile('./dist/loading/index.html');
 
     // Hide menubar
     loadingWindow.setMenuBarVisibility(false);
@@ -153,15 +155,15 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-function dlDoneCallback(res) {
+function dlDoneCallback(res: downloadRes) {
     let archivePath = res.path;
     let binDir = path.parse(archivePath).dir;
-    extract7zip(res.path).then((res) => {
+    extract7zip(archivePath).then((res) => {
         let toolPath = path.join(binDir, findExecutable(binDir).name);
         fs.unlink(archivePath, () => {
             fs.chmod(toolPath, 0o744, () => {
                 setTimeout(() => {
-                    BrowserWindow.getFocusedWindow().webContents.send('dlPing-reply', toolPath);
+                    BrowserWindow.getFocusedWindow().webContents.send('dlFinish', toolPath);
                 }, 200);
             });
         });
@@ -174,18 +176,31 @@ ipcMain.on('loadingDone', (event, args) => {
     log.verbose('Loading window destroyed');
 });
 
-ipcMain.on('dlPing', (event, { url, dlPath }) => {
+ipcMain.on('dlStart', (event, { url, dlPath }) => {
     if (event.sender.getURL().includes('loading')) {
-        download(BrowserWindow.getFocusedWindow(), url, { directory: dlPath, saveAs: false, onCompleted: dlDoneCallback }).catch(logError);
+        download(BrowserWindow.fromId(event.frameId), url, { directory: dlPath, saveAs: false, onCompleted: dlDoneCallback }).catch(logError);
     }
 });
 
 ipcMain.on('selectOutputPath', (event) => {
-    event.reply('selectOutputPath-reply', dialog.showOpenDialogSync({ title: 'Select Output Path', properties: ['openDirectory', 'createDirectory', 'dontAddToRecent'] }))
+    event.reply('selectOutputPath-reply', dialog.showOpenDialogSync({ title: 'Select Output Path', buttonLabel: 'Select', properties: ['openDirectory', 'createDirectory', 'dontAddToRecent', 'showHiddenFiles'], defaultPath: (userPreferences.get('outputPath') as string) }))
 });
 
 ipcMain.on('selectToolPath', (event) => {
-    event.reply('selectToolPath-reply', dialog.showOpenDialogSync({ title: 'Select Tool Path', filters: { name: 'Executable Files', extensions: ['exe'] }, properties: ['openFile', 'createDirectory', 'dontAddToRecent'] }))
+    event.reply('selectToolPath-reply', dialog.showOpenDialogSync({ title: 'Select Tool Path', buttonLabel: 'Select', filters: [{ name: 'Executable Files', extensions: [(is.windows ? 'exe' : '')] }], properties: ['openFile', 'dontAddToRecent', 'showHiddenFiles'], defaultPath: (userPreferences.get('toolPath') as string) }))
+});
+
+ipcMain.on('restart', (_, args) => {
+    if (args) {
+        app.relaunch();
+        app.exit();
+    }
+});
+
+ipcMain.on('updateRequest', (_, args) => {
+    let binDir = path.parse(args).dir
+    fs.rmdirSync(binDir, { recursive: true });
+    fs.mkdirSync(binDir);
 });
 
 ipcMain.on('openExplorer', (_, args) => {
